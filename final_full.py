@@ -3,7 +3,7 @@ import re
 
 class Employee:
     def __init__(self, first_name, last_name, social):
-        self._first_name = first_name
+        self._first_name = first_name #protected attributes
         self._last_name = last_name
         self._social = social
 
