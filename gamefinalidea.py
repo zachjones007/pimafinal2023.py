@@ -18,8 +18,8 @@ class Character:
                 3: {"name": '10 gold coins', "type": "item"},
                 4: {"name": 'HP potion lv2', "type": "item"},
                 5: {"name": 'Mana potion lv2', "type": "item"},
-                6: {"name": '20 gold coins', "type": "item"},
-                7: {"name": 'Magic beans', "type": "item"}
+                6: {"name": '20 gold coins', "type": "potion"},
+                7: {"name": 'Magic beans', "type": "enemy"}
             }
 
     def statsup(self, proc):
@@ -61,15 +61,17 @@ class Character:
     def separate_elements(self):
         items = []
         enemies = []
+        potion = []
 
         for item in self.item_mapping.values():
             if item["type"] == "item":
                 items.append(item["name"])
             elif item["type"] == "enemy":
                 enemies.append(item["name"])
+            elif item["type"] == "potion":
+                potion.append(item["name"])
 
-        return items, enemies
-
+        print(items,enemies,potion)
 player = Character("Player", 50, 5, 0)
 enemy = Character("Enemy", 300, 7, 0)
 
@@ -100,3 +102,4 @@ if player.health <= 0:
     print("You have been defeated!")
 else:
     print("You defeated the enemy!")
+
