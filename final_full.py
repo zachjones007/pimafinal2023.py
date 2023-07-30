@@ -125,6 +125,10 @@ class PasswordGenerator:
             password.append(item_name)
         return ''.join(password)
 
+    def write_password_to_file(password):
+    with open('generated_passwords.txt', 'a') as file:
+        file.write(password + '\n')
+
 
 def main():
     salaried_emp = SalariedEmployee("Alice", "Smith", "987-65-4321", 1000)
