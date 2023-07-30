@@ -87,14 +87,16 @@ class PasswordChecker(Employee):
     """Class to represent employees who can check passwords."""
 
     def check_password(self):
-        has_pass = str(input('Do you have a password? (Y/N)'))
-        if has_pass.upper() == 'Y':
+        has_pass = input('Enter your password to check (or type "exit" to skip): ')
+        if has_pass != "exit":
             with open('passwordlist.txt', 'r') as file:
-                # Logic to check the password goes here...
-                pass
+                passwords = file.readlines()
+                if has_pass + '\n' in passwords:
+                    print("Password found in the list!")
+                else:
+                    print("Password is not in the list.")
         else:
-            # Logic if the employee does not have a password goes here...
-            pass
+            print("Password checking skipped.")
 
 class PasswordGenerator:
     def __init__(self, item_mapping=None):
@@ -125,9 +127,9 @@ class PasswordGenerator:
             password.append(item_name)
         return ''.join(password)
 
-    def write_password_to_file(password):
-    with open('generated_passwords.txt', 'a') as file:
-        file.write(password + '\n')
+    def write_password_to_file(self, password):
+        with open('generated_passwords.txt', 'a') as file:
+            file.write(password + '\n')
 
 
 def main():
@@ -135,7 +137,9 @@ def main():
     hourly_emp = HourlyEmployee("Bob", "Johnson", "456-78-9123", 45, 20)
 
     passwd_gen = PasswordGenerator()
-    print(passwd_gen.generate_random_password())
+    random_pass = passwd_gen.random_password()
+    passwd_gen.write_password_to_file(random_pass)
+    print(f"Generated password: {random_pass}")
 
     password_checker = PasswordChecker("John", "Doe", "123-45-6789")
     password_checker.check_password()
@@ -144,6 +148,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-    main()
-
