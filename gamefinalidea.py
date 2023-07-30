@@ -1,3 +1,6 @@
+#i would like to improve the game by have a loop that you use if you deafted the first boss you go to another
+#with a random mix of stats and ability but slighty stronger then the last. also a login and password so you 
+#can get back to your current game saved on csv
 import random
 
 class Character:
