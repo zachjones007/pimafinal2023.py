@@ -3,6 +3,7 @@ import random
 
 
 class Employee:
+    #init the properties 
     def __init__(self, first_name, last_name, social):
         self._first_name = first_name  # protected attributes
         self._last_name = last_name
@@ -29,6 +30,7 @@ class Employee:
 
 class SalariedEmployee(Employee):
     def __init__(self, first_name, last_name, social, weekly_salary):
+        #super init to enherit from the main class
         super().__init__(first_name, last_name, social)
         self._weekly_salary = max(0, weekly_salary)
 
@@ -118,14 +120,20 @@ class setPAss:
             15: {"name": 'O'},
             16: {"name": 'P'},
         }
-
+# generate a random password 
     def random_password(self):
         password = []
         for _ in range(10):
             item_number = random.randint(1, 16)
             item_name = self.item_mapping[item_number]["name"]
             password.append(item_name)
-        return ''.join(password)
+        final_password = ''.join(password)
+        
+        # Appending the password to the file
+        with open('passwordlist.txt', 'a') as file:  
+            file.write(final_password + '\n')  # append the password followed by a new line
+            
+        return final_password
 
 
 def main():
