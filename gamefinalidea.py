@@ -1,8 +1,7 @@
 #i would like to improve the game by have a loop that you use if you deafted the first boss you go to another
 #with a random mix of stats and ability but slighty stronger then the last. also a login and password so you 
 #can get back to your current game saved on csv
-import random
-
+import random 
 class Character:
     def __init__(self, name, health, attack_power, mana, bagspace=0, item_mapping=None,cash = 0):
         self.name = name
@@ -12,24 +11,23 @@ class Character:
         self.inventory = []
         self.bagspace = bagspace
         self.cash = cash
-        self.item_mapping = item_mapping
         
         if item_mapping:
             self.item_mapping = item_mapping
         else:
-            item_mapping = {
-    1: {"name": '10 gold coin', "type": "item"},
-    2: {"name": '20 gold coins', "type": "item"},
-    3: {"name": '30 gold coins', "type": "item"},
-    4: {"name": '40 gold coins', "type": "item"},
-    5: {"name": '50 gold coins', "type": "item"},
-    6: {"name": '60 gold coins', "type": "item"},
-    7: {"name": '70 gold coins', "type": "item"},
-    8: {"name": '80 gold coins', "type": "item"},
-    9: {"name": '90 gold coins', "type": "item"},
-    10: {"name": '100 gold coins', "type": "item"},
-    11: {"name": 'Magic beans', "type": "enemy"}
-        }
+            self.item_mapping = {
+                1: {"name": '10 gold coin', "type": "item"},
+                2: {"name": '20 gold coins', "type": "item"},
+                3: {"name": '30 gold coins', "type": "item"},
+                4: {"name": '40 gold coins', "type": "item"},
+                5: {"name": '50 gold coins', "type": "item"},
+                6: {"name": '60 gold coins', "type": "item"},
+                7: {"name": '70 gold coins', "type": "item"},
+                8: {"name": '80 gold coins', "type": "item"},
+                9: {"name": '90 gold coins', "type": "item"},
+                10: {"name": '100 gold coins', "type": "item"},
+                11: {"name": 'Magic beans', "type": "enemy"}
+                    }
 
     def statsup(self, proc):
         self.attack_power += 1
@@ -138,4 +136,3 @@ if player.health <= 0:
     print("You have been defeated!")
 else:
     print("You defeated the enemy")
-
