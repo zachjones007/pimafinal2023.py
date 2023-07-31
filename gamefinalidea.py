@@ -1,17 +1,19 @@
-#i would like to improve the game by have a loop that you use if you deafted the first boss you go to another
-#with a random mix of stats and ability but slighty stronger then the last. also a login and password so you 
-#can get back to your current game saved on csv
+#i think i need a class for enemy 
 import random 
 class Character:
-    def __init__(self, name, health, attack_power, mana, bagspace=0, item_mapping=None,cash = 0):
+    def __init__(self,enemy_attackpower,enemy_health, name, health, attack_power, mana, bagspace=0, item_mapping=None,cash = 0,enemy_moves_mapping=None,wins=0):
         self.name = name
+        self.enemy_buffs = []  
         self.health = health
         self.attack_power = attack_power
         self.mana = mana 
         self.inventory = []
         self.bagspace = bagspace
         self.cash = cash
-        
+        self.enemy_moves_mapping=enemy_moves_mapping
+        self.wins=wins
+        self.enemy_health=enemy_health
+        self.enemy_attackpower = enemy_attackpower
         if item_mapping:
             self.item_mapping = item_mapping
         else:
@@ -28,6 +30,37 @@ class Character:
                 10: {"name": '100 gold coins', "type": "item"},
                 11: {"name": 'Magic beans', "type": "enemy"}
                     }
+
+        if enemy_moves_mapping:
+            self.enemy_moves_mapping = enemy_moves_mapping
+        else:
+            self.enemy_moves_mapping = {
+                1: {"buff": '+1 damage ', "type": "item"},
+                2: {"buff": '+2 damage', "type": "item"},
+                3: {"buff": '+3 damage', "type": "item"},
+                4: {"buff": '+40 hp', "type": "item"},
+                5: {"buff": '+50 hp', "type": "item"},
+                6: {"buff": '+60 hp', "type": "item"},
+                7: {"buff": '+7 healing per turn', "type": "item"},
+                8: {"buff": '+8 healing per turn', "type": "item"},
+                9: {"buff": '+ 9 healing per turn', "type": "item"},
+                10: {"buff": '- 80 hp ', "type": "item"},
+                11: {"buff": '- 4 damage', "type": "enemy"}
+                    }
+    def evil_buffer(self, wins):
+        for _ in range(wins):
+            buff_number = random.randint(1, 11)
+            buff_name = self.enemy_moves_mapping[buff_number]["buff"]
+            self.enemy_buffs.append(buff_name)
+
+            if buff_number in [4, 5, 6]:
+                self.enemy_health += buff_number * 10
+            elif buff_number == 10:
+                self.enemy_health -= 80
+
+            if buff_number <= 3:
+                self.enemy_attackpower += buff_number
+        return self.enemy_buffs
 
     def statsup(self, proc):
         self.attack_power += 1
@@ -106,11 +139,16 @@ class Character:
                 potion.append(item["name"])
 
         print(items,enemies,potion)
-player = Character("Player", 50, 5, 0)
-enemy = Character("Enemy", 300, 7, 0)
 
-while player.health > 0 and enemy.health > 0:
-    action = input("Do you want to attack, buff, heal or check bag? ").lower()
+wins = 0
+lives = 1
+player = Character(3, 50, "Player", 50, 5, 0) 
+enemy = Character(7, 300, "Enemy", 300, 7, 0) 
+
+while lives == 1 and player.health > 0:
+    enemy_buffs = enemy.evil_buffer(wins)
+
+    action = input("Do you want to attack, buff, heal, or check bag? ").lower()
 
     if action == 'attack':
         player.attack(enemy)
@@ -132,7 +170,14 @@ while player.health > 0 and enemy.health > 0:
     else:
         print("You decided not to do anything.")
 
-if player.health <= 0:
-    print("You have been defeated!")
-else:
-    print("You defeated the enemy")
+    if enemy.health <= 0:
+        print("You defeated the enemy")
+        wins += 1
+        enemy = Character(7, 300, "Enemy", 300, 7, 0)  # Create a new enemy for the next round
+
+        print(f"you go deeper... you are on level {wins}")
+
+    elif player.health <= 0:
+        print("You have been defeated!")
+        lives -= 1
+        quit()nemy")
