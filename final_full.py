@@ -1,3 +1,6 @@
+import csv
+from ping3 import ping
+import ezgmail
 import random
 
 class Employee:
@@ -85,18 +88,44 @@ class HourlyEmployee(Employee):
 
 class PasswordChecker(Employee):
     """Class to represent employees who can check passwords."""
-
+    
     def check_password(self):
-        has_pass = input('Enter your password to check (or type "exit" to skip): ')
-        if has_pass != "exit":
-            with open('passwordlist.txt', 'r') as file:
-                passwords = file.readlines()
-                if has_pass + '\n' in passwords:
-                    print("Password found in the list!")
-                else:
-                    print("Password is not in the list.")
-        else:
-            print("Password checking skipped.")
+        x = 0
+        doyouhaveanemail = input("do you have an email?")
+        has_user = input('Enter your email: ')
+        with open('generated_passwords.csv', 'r') as file:
+            csv_reader = csv.reader(file)
+            for row in csv_reader:
+                username, password = row
+                if has_user == username:
+                    has_pass = input('Enter your password: ')
+                    if has_pass == password:
+                        print("Password matched!")
+                    elif x == 4:
+                        print("Incorrect password!")
+                        print('sending password recovery to your email' )
+                        ezgmail.init(tokenFile='token.json', credentialsFile='credentials.json')
+
+                        # Open the CSV file and read IP addresses
+                        ipFile = open('ip.csv')
+                        ipReader = csv.DictReader(ipFile)
+                        msg = "Someone may have tried accessing your account. Here's a ping check:\n\n"
+                        for row in ipReader:
+                            ip = row['ip']
+                            ping_time = ping(ip)
+                            msg += f"{ip}: {ping_time}\n"
+                        # Close the CSV file
+                        ipFile.close()
+
+                        # Send the email
+                        subject = "Someone could be trying to get into your account"
+                        ezgmail.send(username, subject, msg)
+                    else: 
+                        print("Password is incorrect")
+                        x += 1 
+                    break
+            else:
+                print("Username not found!")
 
 class PasswordGenerator:
     def __init__(self, item_mapping=None):
@@ -127,19 +156,17 @@ class PasswordGenerator:
             password.append(item_name)
         return ''.join(password)
 
-    def write_password_to_file(self, password):
-        with open('generated_passwords.txt', 'a') as file:
-            file.write(password + '\n')
-
+    def write_password_to_file(self, email, password):
+        with open('generated_passwords.csv', 'a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([email, password])
 
 def main():
-    salaried_emp = SalariedEmployee("Alice", "Smith", "987-65-4321", 1000)
-    hourly_emp = HourlyEmployee("Bob", "Johnson", "456-78-9123", 45, 20)
-
     passwd_gen = PasswordGenerator()
+    email = input('Enter email to generate password for: ')
     random_pass = passwd_gen.random_password()
-    passwd_gen.write_password_to_file(random_pass)
-    print(f"Generated password: {random_pass}")
+    passwd_gen.write_password_to_file(email, random_pass)
+    print(f"Generated password for {email}: {random_pass}")
 
     password_checker = PasswordChecker("John", "Doe", "123-45-6789")
     password_checker.check_password()
@@ -148,3 +175,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
