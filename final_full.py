@@ -2,14 +2,16 @@ import csv
 from ping3 import ping
 import ezgmail
 import random
+import logging
+
+logging.basicConfig(filename='automation_log.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
 
 class Employee:
-    """Base class for all types of employees."""
-    
-    def __init__(self, first_name, last_name, social):
+    def __init__(self, first_name, last_name, social, hours):
         self._first_name = first_name
         self._last_name = last_name
         self._social = social
+        self._hours = hours
 
     @property
     def first_name(self):
@@ -23,72 +25,32 @@ class Employee:
     def social(self):
         return self._social
 
-    def earnings(self):
-        """Method to calculate earnings for the employee."""
-        pass
-
-    def __repr__(self):
-        return f"Name: {self._first_name} {self._last_name}, Social: {self._social}"
-
-class SalariedEmployee(Employee):
-    """Class to represent employees with a fixed weekly salary."""
-    
-    def __init__(self, first_name, last_name, social, weekly_salary):
-        super().__init__(first_name, last_name, social)
-        self._weekly_salary = max(0, weekly_salary)
-
-    @property
-    def weekly_salary(self):
-        return self._weekly_salary
-
-    @weekly_salary.setter
-    def weekly_salary(self, value):
-        self._weekly_salary = max(0, value)
-
-    def earnings(self):
-        return self._weekly_salary
-
-    def __repr__(self):
-        return f"Salaried Employee: {super().__repr__()}"
-
-class HourlyEmployee(Employee):
-    """Class to represent employees who are paid based on hourly wages."""
-    
-    def __init__(self, first_name, last_name, social, hours, wage_per_hour):
-        super().__init__(first_name, last_name, social)
-        self._hours = max(0, hours)
-        self._wage_per_hour = max(0, wage_per_hour)
-
     @property
     def hours(self):
         return self._hours
 
-    @hours.setter
-    def hours(self, value):
-        self._hours = max(0, value)
-
-    @property
-    def wage_per_hour(self):
-        return self._wage_per_hour
-
-    @wage_per_hour.setter
-    def wage_per_hour(self, value):
-        self._wage_per_hour = max(0, value)
-
     def earnings(self):
-        if self._hours <= 40:
-            return self._hours * self._wage_per_hour
-        else:
-            regular_pay = 40 * self._wage_per_hour
-            overtime_pay = (self._hours - 40) * 1.5 * self._wage_per_hour
-            return regular_pay + overtime_pay
+        pass
 
     def __repr__(self):
-        return f"Hourly Employee: {super().__repr__()}"
+        overtime_status = "Overtime" if self._hours == "1" else "Regular"
+        return f"Name: {self._first_name} {self._last_name}, Social: {self._social}, Status: {overtime_status}"
+
+def password_strength(password):
+    if len(password) < 8:
+        return False
+    if not any(char.isdigit() for char in password):
+        return False
+    if not any(char.isupper() for char in password):
+        return False
+    if not any(char.islower() for char in password):
+        return False
+    special_characters = ['@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '!']
+    if not any(char in special_characters for char in password):
+        return False
+    return True
 
 class PasswordChecker(Employee):
-    """Class to represent employees who can check passwords."""
-    
     def check_password(self):
         x = 0
         doyouhaveanemail = input("do you have an email?")
@@ -96,8 +58,10 @@ class PasswordChecker(Employee):
         with open('generated_passwords.csv', 'r') as file:
             csv_reader = csv.reader(file)
             for row in csv_reader:
-                username, password = row
+                username, password, hours = row
                 if has_user == username:
+                    employee = Employee(username, "", "", hours)
+                    print(employee)
                     has_pass = input('Enter your password: ')
                     if has_pass == password:
                         print("Password matched!")
@@ -105,8 +69,6 @@ class PasswordChecker(Employee):
                         print("Incorrect password!")
                         print('sending password recovery to your email' )
                         ezgmail.init(tokenFile='token.json', credentialsFile='credentials.json')
-
-                        # Open the CSV file and read IP addresses
                         ipFile = open('ip.csv')
                         ipReader = csv.DictReader(ipFile)
                         msg = "Someone may have tried accessing your account. Here's a ping check:\n\n"
@@ -114,10 +76,7 @@ class PasswordChecker(Employee):
                             ip = row['ip']
                             ping_time = ping(ip)
                             msg += f"{ip}: {ping_time}\n"
-                        # Close the CSV file
                         ipFile.close()
-
-                        # Send the email
                         subject = "Someone could be trying to get into your account"
                         ezgmail.send(username, subject, msg)
                     else: 
@@ -156,23 +115,25 @@ class PasswordGenerator:
             password.append(item_name)
         return ''.join(password)
 
-    def write_password_to_file(self, email, password):
+    def write_password_to_file(self, email, password, hours):
         with open('generated_passwords.csv', 'a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([email, password])
+            writer.writerow([email, password, hours])
+        logging.info(f'Generated password for {email} and saved to file.')
 
 def main():
     passwd_gen = PasswordGenerator()
     email = input('Enter email to generate password for: ')
+    hours_worked = int(input('Enter the number of hours worked: '))
+    employee_type = "1" if hours_worked > 40 else "0"
     random_pass = passwd_gen.random_password()
-    passwd_gen.write_password_to_file(email, random_pass)
-    print(f"Generated password for {email}: {random_pass}")
-
-    password_checker = PasswordChecker("John", "Doe", "123-45-6789")
+    while not password_strength(random_pass):
+        random_pass = passwd_gen.random_password()
+    passwd_gen.write_password_to_file(email, random_pass, employee_type)
+    print(f"Generated strong password for {email}: {random_pass}")
+    password_checker = PasswordChecker("John", "Doe", "123-45-6789", hours=employee_type)
     password_checker.check_password()
-
     print('Thank you')
 
 if __name__ == '__main__':
     main()
-
